@@ -1,0 +1,296 @@
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --rose:      #c4607e;
+    --rose-pale: #f7d6e0;
+    --bg:        #1a0810;
+}
+
+body {
+    background: var(--bg);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+/* ── GRAIN CINEMATOGRÁFICO ── */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 98;
+    mix-blend-mode: overlay;
+}
+
+/* ── SLIDES ── */
+#stage { position: absolute; inset: 0; }
+
+.slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+}
+
+.slide.active { opacity: 1; }
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    animation: kenburns 14s ease-in-out forwards;
+}
+
+@keyframes kenburns {
+    0%   { transform: scale(1.1) translate(1.5%, 1%); }
+    100% { transform: scale(1)   translate(-1%, -0.5%); }
+}
+
+.slide:nth-child(even) img { animation-name: kb2; }
+@keyframes kb2 {
+    0%   { transform: scale(1.1) translate(-1.5%, -1%); }
+    100% { transform: scale(1)   translate(1%, 0.5%); }
+}
+
+/* ── VINHETA ── */
+.vignette {
+    position: absolute;
+    inset: 0;
+    background:
+            radial-gradient(ellipse 80% 60% at 50% 0%,   transparent 40%, rgba(26,8,16,0.55) 100%),
+            radial-gradient(ellipse 100% 55% at 50% 100%, rgba(26,8,16,0.95) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* ── BARRA TOPO ── */
+.linha-topo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent 0%, rgba(196,96,126,0.5) 50%, transparent 100%);
+    z-index: 20;
+    pointer-events: none;
+}
+
+/* ── CONTADOR ── */
+#contador {
+    position: absolute;
+    top: 28px;
+    right: 32px;
+    z-index: 20;
+    font-size: clamp(0.65rem, 1.2vw, 0.78rem);
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    color: rgba(247,214,224,0.45);
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── DIAMANTE TOPO ── */
+#diamond {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* ── PAINEL GLASS ── */
+.painel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 44vh;
+    background: linear-gradient(
+            to top,
+            rgba(26, 8, 16, 0.92) 0%,
+            rgba(26, 8, 16, 0.65) 40%,
+            rgba(26, 8, 16, 0.2)  70%,
+            transparent 100%
+    );
+    pointer-events: none;
+    z-index: 8;
+}
+
+/* ── OVERLAY ── */
+#overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 6vh;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.nome-container {
+    text-align: center;
+    animation: fadeUp 2.4s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.label-16 {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(4rem, 9vw, 8rem);
+    color: var(--rose);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-shadow:
+            0 0 40px  rgba(196,96,126,0.6),
+            0 0 100px rgba(196,96,126,0.25),
+            0 2px 4px rgba(0,0,0,0.4);
+}
+
+.nome {
+    font-weight: 300;
+    font-size: clamp(1rem, 2.8vw, 2.2rem);
+    color: var(--rose-pale);
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    margin-top: 0.2em;
+    text-shadow: 0 0 30px rgba(196,96,126,0.35);
+}
+
+/* Divisor com animação de entrada */
+.divisor {
+    position: relative;
+    height: 1px;
+    margin: 1em auto;
+    width: 0;
+    animation: expandir 1.8s 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+    overflow: visible;
+}
+
+@keyframes expandir {
+    to { width: 140px; }
+}
+
+.divisor::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent, var(--rose), transparent);
+}
+
+/* Losango no centro do divisor */
+.divisor::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%) rotate(45deg);
+    width: 5px;
+    height: 5px;
+    background: var(--rose);
+    opacity: 0.8;
+}
+
+.data {
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(0.75rem, 1.6vw, 1.05rem);
+    color: rgba(247,214,224,0.6);
+    letter-spacing: 0.25em;
+    margin-top: 0.2em;
+}
+
+/* ── CANTOS ── */
+.corner {
+    position: absolute;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.corner svg { opacity: 0.35; }
+.corner.tl { top: 20px; left: 20px; }
+.corner.tr { top: 20px; right: 20px; transform: scaleX(-1); }
+.corner.bl { bottom: 20px; left: 20px; transform: scaleY(-1); }
+.corner.br { bottom: 20px; right: 20px; transform: scale(-1); }
+
+/* ── PARTICLES ── */
+#particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    animation: floatUp linear infinite;
+    opacity: 0;
+}
+
+.particle.circle {
+    border-radius: 50%;
+    background: var(--rose);
+}
+
+.particle.star {
+    background: transparent;
+    box-shadow:
+            0 0 0 1px rgba(196,96,126,0.8),
+            0 0 6px rgba(196,96,126,0.5);
+    transform-origin: center;
+}
+
+@keyframes floatUp {
+    0%   { opacity: 0;   transform: translateY(0)       scale(0) rotate(0deg); }
+    8%   { opacity: 0.9; }
+    75%  { opacity: 0.3; }
+    100% { opacity: 0;   transform: translateY(-100vh)  scale(1.1) rotate(180deg); }
+}
+
+/* ── PROGRESS BAR ── */
+#progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(to right, rgba(196,96,126,0.4), var(--rose));
+    z-index: 30;
+    box-shadow: 0 0 12px rgba(196,96,126,0.7);
+}
+
+/* ── DOTS ── */
+#dots {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 25;
+}
+
+.dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(196,96,126,0.25);
+    transition: background 0.5s, transform 0.5s, width 0.5s;
+}
+
+.dot.active {
+    background: var(--rose);
+    transform: scale(1.5);
+    width: 14px;
+    border-radius: 3px;
+}
