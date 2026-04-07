@@ -146,7 +146,12 @@ body::after {
 }
 .painel {
     position: absolute; bottom: 0; left: 0; right: 0; height: 52vh;
-    background: linear-gradient(to top,rgba(20,5,9,0.97) 0%,rgba(20,5,9,0.7) 35%,rgba(20,5,9,0.2) 65%,transparent 100%);
+    background: linear-gradient(
+            to top,
+            rgba(20,5,9,0.97) 0%,
+            rgba(20,5,9,0.7) 35%,
+            rgba(20,5,9,0.2) 65%,
+            transparent 100%);
     pointer-events: none; z-index: 8;
 }
 

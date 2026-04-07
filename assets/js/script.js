@@ -18,24 +18,6 @@ const FOTOS = [
     "./assets/img/eloah_fofa.jpg",
     "./assets/img/eloah_3anos4.jpg",
     "./assets/img/eloah_cadeira.jpg",
-    "./assets/img/avos.jpg",
-    "./assets/img/eloah1.jpg",
-    "./assets/img/eloah2.jpg",
-    "./assets/img/eloah3.jpg",
-    "./assets/img/eloah4.jpg",
-    "./assets/img/eloah5.jpg",
-    "./assets/img/eloah6.jpg",
-    "./assets/img/eloah7.jpg",
-    "./assets/img/eloah8.jpg",
-    "./assets/img/eloah9.jpg",
-    "./assets/img/eloah10.jpg",
-    "./assets/img/eloah11.jpg",
-    "./assets/img/eloah12.jpg",
-    "./assets/img/eloah13.jpg",
-    "./assets/img/eloah14.jpg",
-    "./assets/img/eloah15.jpg",
-    "./assets/img/eloah16.jpg",
-    "./assets/img/eloah17.jpg",
 ];
 
 const DURACAO_POR_FOTO = 14000;
@@ -347,7 +329,6 @@ function explode(x, y, color) {
     ctx.save();
     ctx.globalAlpha = 0.18;
     ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
-    ctx.fillRect(0, 0, W, H);
     ctx.restore();
 }
 
@@ -372,8 +353,7 @@ function salvaDeFogos() {
 }
 
 function loopFogos() {
-    ctx.fillStyle = "rgba(20,5,9,0.18)";
-    ctx.fillRect(0, 0, W, H);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = rockets.length - 1; i >= 0; i--) {
         rockets[i].update();
