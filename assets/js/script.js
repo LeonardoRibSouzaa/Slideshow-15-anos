@@ -18,6 +18,24 @@ const FOTOS = [
     "./assets/img/eloah_fofa.jpg",
     "./assets/img/eloah_3anos4.jpg",
     "./assets/img/eloah_cadeira.jpg",
+    "./assets/img/avos.jpg",
+    "./assets/img/eloah1.jpg",
+    "./assets/img/eloah2.jpg",
+    "./assets/img/eloah3.jpg",
+    "./assets/img/eloah4.jpg",
+    "./assets/img/eloah5.jpg",
+    "./assets/img/eloah6.jpg",
+    "./assets/img/eloah7.jpg",
+    "./assets/img/eloah8.jpg",
+    "./assets/img/eloah9.jpg",
+    "./assets/img/eloah10.jpg",
+    "./assets/img/eloah11.jpg",
+    "./assets/img/eloah12.jpg",
+    "./assets/img/eloah13.jpg",
+    "./assets/img/eloah14.jpg",
+    "./assets/img/eloah15.jpg",
+    "./assets/img/eloah16.jpg",
+    "./assets/img/eloah17.jpg"
 ];
 
 const DURACAO_POR_FOTO = 14000;
