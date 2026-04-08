@@ -229,16 +229,9 @@ for (let i = 0; i < 25; i++) criarParticula();
 // ═══════════════════════════
 //  FOGOS DE ARTIFÍCIO — CANVAS
 // ═══════════════════════════
-const canvas = document.getElementById("fireworks-canvas");
-const ctx    = canvas.getContext("2d");
-canvas.width  = W;
-canvas.height = H;
 
-const FIREWORK_COLORS = [
-    [196,96,126], [232,192,122], [247,214,224],
-    [220,130,160], [255,200,220], [245,223,160],
-    [255,160,180], [200,80,110],
-];
+
+
 
 class Rocket {
     constructor() { this.reset(); }
