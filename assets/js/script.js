@@ -5,6 +5,7 @@
 const NOME = "Eloah";
 const DATA = "06 de abril de 2026";
 
+
 const FOTOS = [
     "./assets/img/eloah_quando_chegou.webp",
     "./assets/img/eloah_baby.webp",
@@ -42,12 +43,18 @@ const DURACAO_POR_FOTO = 14000;
 const EMBARALHAR       = true;
 
 // ════════════════════════════════════════════════════
+// ⚡ CONFIGURAÇÕES DE PERFORMANCE
+//    Ajuste esses valores se ainda travar
+// ════════════════════════════════════════════════════
+const MAX_PARTICULAS   = 14;   // máximo simultâneo de partículas no DOM
+const INTERVALO_PART   = 700;  // ms entre cada nova partícula
+const MAX_SPARKS       = 45;   // faíscas por explosão de fogo
+const INTERVALO_FOGUETE = 4000; // ms entre cada foguete
+// ════════════════════════════════════════════════════
 
 document.getElementById("nome-display").textContent = NOME;
 document.getElementById("data-display").textContent = DATA;
-
-const label16 = document.querySelector(".label-16");
-label16.setAttribute("data-text", label16.textContent);
+document.querySelector(".label-16").setAttribute("data-text", "15 Anos");
 
 const fotos = EMBARALHAR
     ? [...FOTOS].sort(() => Math.random() - 0.5)
@@ -68,15 +75,13 @@ fotos.forEach(() => {
     dot.className = "dot";
     dotsEl.appendChild(dot);
 });
-
 fotos.forEach((src, i) => {
     stage.querySelectorAll(".slide")[i].querySelector("img").src = src;
 });
 
 const slides = document.querySelectorAll(".slide");
 const dots   = document.querySelectorAll(".dot");
-let current = 0;
-let startTime, rafId;
+let current = 0, startTime, rafId;
 
 const flashEl = document.getElementById("flash");
 function dispararFlash() {
@@ -87,8 +92,7 @@ function dispararFlash() {
 
 function atualizarContador() {
     const el = document.getElementById("contador");
-    if (!el) return;
-    el.textContent = `${String(current+1).padStart(2,"0")} · ${String(slides.length).padStart(2,"0")}`;
+    if (el) el.textContent = `${String(current+1).padStart(2,"0")} · ${String(slides.length).padStart(2,"0")}`;
 }
 
 function reiniciarDivisor() {
@@ -102,20 +106,15 @@ function reiniciarDivisor() {
 function mostrarSlide(idx) {
     slides[current].classList.remove("active");
     dots[current].classList.remove("active");
-
     const oldImg = slides[idx].querySelector("img");
-    const newImg = oldImg.cloneNode(true);
-    slides[idx].replaceChild(newImg, oldImg);
-
+    slides[idx].replaceChild(oldImg.cloneNode(true), oldImg);
     current = idx;
     slides[current].classList.add("active");
     dots[current].classList.add("active");
-
     atualizarContador();
     reiniciarDivisor();
     dispararFlash();
-    setTimeout(() => criarBurst(W/2, H * 0.76), 350);
-
+    setTimeout(() => criarBurst(W / 2, H * 0.77), 320);
     startTime = performance.now();
     cancelAnimationFrame(rafId);
     animarProgress();
@@ -126,8 +125,7 @@ function proximo() { mostrarSlide((current + 1) % slides.length); }
 function animarProgress() {
     const bar = document.getElementById("progress");
     function tick(now) {
-        const pct = Math.min(((now - startTime) / DURACAO_POR_FOTO) * 100, 100);
-        bar.style.width = pct + "vw";
+        bar.style.width = Math.min(((now - startTime) / DURACAO_POR_FOTO) * 100, 100) + "vw";
         if (now - startTime < DURACAO_POR_FOTO) rafId = requestAnimationFrame(tick);
         else proximo();
     }
@@ -136,147 +134,144 @@ function animarProgress() {
 
 mostrarSlide(0);
 
-// ═══════════════════════════
-//  DIMENSÕES
-// ═══════════════════════════
-let W = window.innerWidth;
-let H = window.innerHeight;
-window.addEventListener("resize", () => { W = window.innerWidth; H = window.innerHeight; canvas.width = W; canvas.height = H; });
+let W = window.innerWidth, H = window.innerHeight;
+window.addEventListener("resize", () => {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W; canvas.height = H;
+});
 
-// ═══════════════════════════
-//  ESTRELAS FIXAS
-// ═══════════════════════════
+// ══════════════════════════════════════════
+//  STARFIELD — 35 estrelas (era 80)
+// ══════════════════════════════════════════
 const starfield = document.getElementById("starfield");
-for (let i = 0; i < 80; i++) {
+for (let i = 0; i < 35; i++) {
     const s = document.createElement("div");
     s.className = "star-fixed";
     const size = Math.random() * 2.5 + 0.5;
     s.style.cssText = `
         width:${size}px; height:${size}px;
         top:${Math.random()*100}%; left:${Math.random()*100}%;
-        --dur:${(Math.random()*4+1.5).toFixed(1)}s;
+        --dur:${(Math.random()*4+2).toFixed(1)}s;
         --delay:-${(Math.random()*6).toFixed(1)}s;
-        --min-op:${(Math.random()*0.12+0.04).toFixed(2)};
-        --max-op:${(Math.random()*0.6+0.3).toFixed(2)};
+        --lo:${(Math.random()*0.1+0.04).toFixed(2)};
+        --hi:${(Math.random()*0.55+0.25).toFixed(2)};
     `;
     starfield.appendChild(s);
 }
 
-// ═══════════════════════════
-//  BOKEH
-// ═══════════════════════════
+// ══════════════════════════════════════════
+//  BOKEH — 4 bolas (era 6), blur menor
+// ══════════════════════════════════════════
 const bokehEl = document.getElementById("bokeh");
-const BOKEH_CONFIGS = [
-    { w:280,h:280, top:"10%",  left:"5%",  blur:35, dur:22, delay:0,   op1:0.10, op2:0.20, tx1:"8vw",  ty1:"-5vh",  tx2:"-6vw", ty2:"8vh",  color:"rgba(196,96,126,0.55)"  },
-    { w:200,h:200, top:"60%",  left:"75%", blur:28, dur:18, delay:-5,  op1:0.08, op2:0.18, tx1:"-7vw", ty1:"-8vh",  tx2:"5vw",  ty2:"-4vh", color:"rgba(232,192,122,0.45)"  },
-    { w:160,h:160, top:"25%",  left:"50%", blur:22, dur:26, delay:-9,  op1:0.07, op2:0.15, tx1:"5vw",  ty1:"6vh",   tx2:"-4vw", ty2:"-7vh", color:"rgba(196,96,126,0.4)"   },
-    { w:240,h:240, top:"70%",  left:"20%", blur:40, dur:30, delay:-14, op1:0.09, op2:0.17, tx1:"10vw", ty1:"-6vh",  tx2:"-8vw", ty2:"5vh",  color:"rgba(247,214,224,0.35)"  },
-    { w:120,h:120, top:"45%",  left:"88%", blur:18, dur:16, delay:-3,  op1:0.06, op2:0.14, tx1:"-6vw", ty1:"4vh",   tx2:"4vw",  ty2:"-8vh", color:"rgba(232,192,122,0.5)"   },
-    { w:180,h:180, top:"5%",   left:"65%", blur:30, dur:20, delay:-7,  op1:0.08, op2:0.16, tx1:"6vw",  ty1:"7vh",   tx2:"-5vw", ty2:"-5vh", color:"rgba(196,96,126,0.45)"  },
-];
-BOKEH_CONFIGS.forEach(c => {
+[
+    { w:240,h:240, top:"8%",  left:"4%",  blur:28, dur:22, delay:0,  op1:.10,op2:.20, tx:"7vw",  ty:"-5vh"  },
+    { w:180,h:180, top:"60%", left:"74%", blur:22, dur:18, delay:-5, op1:.08,op2:.17, tx:"-6vw", ty:"-7vh"  },
+    { w:150,h:150, top:"28%", left:"52%", blur:18, dur:26, delay:-9, op1:.06,op2:.14, tx:"5vw",  ty:"6vh"   },
+    { w:200,h:200, top:"68%", left:"18%", blur:30, dur:30, delay:-14,op1:.08,op2:.16, tx:"8vw",  ty:"-5vh"  },
+].forEach(c => {
     const el = document.createElement("div");
     el.className = "bokeh-circle";
     el.style.cssText = `
-        width:${c.w}px; height:${c.h}px;
-        top:${c.top}; left:${c.left};
-        background:radial-gradient(circle, ${c.color}, transparent 70%);
+        width:${c.w}px; height:${c.h}px; top:${c.top}; left:${c.left};
+        background:radial-gradient(circle, rgba(196,96,126,0.5), transparent 70%);
         --blur:${c.blur}px; --dur:${c.dur}s; --delay:-${c.delay}s;
-        --op1:${c.op1}; --op2:${c.op2};
-        --tx1:${c.tx1}; --ty1:${c.ty1}; --tx2:${c.tx2}; --ty2:${c.ty2};
+        --op1:${c.op1}; --op2:${c.op2}; --tx:${c.tx}; --ty:${c.ty};
     `;
     bokehEl.appendChild(el);
 });
 
-// ═══════════════════════════
-//  PARTÍCULAS
-// ═══════════════════════════
+// ══════════════════════════════════════════
+//  PARTÍCULAS — máx MAX_PARTICULAS
+// ══════════════════════════════════════════
 const pc = document.getElementById("particles");
-const HEARTS = ["♥","♡","❤","🌸","✿","❀"];
+const HEARTS = ["♥","♡","❀","✿"];
+let particleCount = 0;
 
 function criarParticula() {
-    const p = document.createElement("div");
-    const r = Math.random();
-    let tipo = r < 0.22 ? "circle" : r < 0.40 ? "star" : r < 0.62 ? "heart" : r < 0.82 ? "petal" : "gold";
+    if (particleCount >= MAX_PARTICULAS) return;
+    const r    = Math.random();
+    const tipo = r < 0.30 ? "circle" : r < 0.55 ? "heart" : r < 0.78 ? "petal" : "gold";
+    const p    = document.createElement("div");
     p.className = `particle ${tipo}`;
 
-    const size = {circle:Math.random()*4+1.5, star:Math.random()*5+2, heart:Math.random()*18+10, petal:Math.random()*14+8, gold:Math.random()*3+1.5}[tipo];
-    const dur   = Math.random() * 16 + 9;
-    const delay = Math.random() * 5;
+    const size = tipo === "circle" ? Math.random()*5+2
+        : tipo === "heart"  ? Math.random()*22+12
+            : tipo === "petal"  ? Math.random()*16+8
+                :                     Math.random()*4+2;
+    const dur   = Math.random() * 12 + 10;
+    const delay = Math.random() * 3;
 
     p.style.cssText = `
-        left:${Math.random()*100}vw;
-        bottom:-${size+6}px;
+        left:${Math.random()*92+2}vw; bottom:-${size+4}px;
         width:${tipo==="heart"?"auto":size+"px"};
         height:${tipo==="heart"?"auto":size+"px"};
         font-size:${size}px;
         animation-duration:${dur}s;
         animation-delay:${delay}s;
     `;
-
     if (tipo === "heart") {
         p.textContent = HEARTS[Math.floor(Math.random()*HEARTS.length)];
-        p.style.color = `rgba(${196+Math.floor(Math.random()*30)},${60+Math.floor(Math.random()*60)},${100+Math.floor(Math.random()*40)},0.8)`;
+        p.style.color = `rgba(196,${70+Math.floor(Math.random()*50)},${100+Math.floor(Math.random()*40)},0.8)`;
     }
 
+    particleCount++;
     pc.appendChild(p);
-    setTimeout(() => p.remove(), (dur + delay + 1) * 1000);
+    setTimeout(() => { p.remove(); particleCount--; }, (dur + delay + 0.5) * 1000);
 }
 
-setInterval(criarParticula, 240);
-for (let i = 0; i < 25; i++) criarParticula();
+setInterval(criarParticula, INTERVALO_PART);
+for (let i = 0; i < 7; i++) setTimeout(criarParticula, i * 250);
 
-// ═══════════════════════════
-//  FOGOS DE ARTIFÍCIO — CANVAS
-// ═══════════════════════════
+// ══════════════════════════════════════════
+//  FOGOS DE ARTIFÍCIO — canvas otimizado
+//  Menos faíscas, menos foguetes simultâneos
+// ══════════════════════════════════════════
+const canvas = document.getElementById("fireworks-canvas");
+const ctx    = canvas.getContext("2d");
+canvas.width  = W;
+canvas.height = H;
 
-
-
+const CORES = [
+    [196,96,126], [232,192,122], [247,214,224],
+    [220,130,160], [245,223,160],
+];
 
 class Rocket {
-    constructor() { this.reset(); }
-    reset() {
-        this.x    = W * (0.15 + Math.random() * 0.7);
-        this.y    = H;
-        this.tx   = W * (0.1 + Math.random() * 0.8);
-        this.ty   = H * (0.08 + Math.random() * 0.45);
-        this.speed = 18 + Math.random() * 10;
-        const ang = Math.atan2(this.ty - this.y, this.tx - this.x);
-        this.vx   = Math.cos(ang) * this.speed;
-        this.vy   = Math.sin(ang) * this.speed;
-        this.color = FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)];
-        this.trail  = [];
-        this.alive  = true;
-        this.exploded = false;
+    constructor() {
+        this.x  = W * (0.15 + Math.random() * 0.7);
+        this.y  = H;
+        this.ty = H * (0.08 + Math.random() * 0.45);
+        const ang = Math.atan2(this.ty - H, (W * (0.1 + Math.random()*0.8)) - this.x);
+        const spd = 16 + Math.random() * 8;
+        this.vx = Math.cos(ang) * spd;
+        this.vy = Math.sin(ang) * spd;
+        this.color = CORES[Math.floor(Math.random() * CORES.length)];
+        this.trail = [];
+        this.alive = true;
     }
     update() {
-        if (this.exploded) return;
         this.trail.push({ x: this.x, y: this.y });
-        if (this.trail.length > 12) this.trail.shift();
+        if (this.trail.length > 8) this.trail.shift(); // cauda curta
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += 0.3; // gravity
-        if (this.y <= this.ty || (this.vy > 0 && this.y > this.ty + 20)) {
+        this.vy += 0.35;
+        if (this.vy > 0 || this.y <= this.ty) {
             explode(this.x, this.y, this.color);
-            this.exploded = true;
             this.alive = false;
         }
     }
     draw() {
-        if (this.exploded) return;
         for (let i = 0; i < this.trail.length; i++) {
-            const t = this.trail[i];
-            const a = (i / this.trail.length) * 0.7;
             ctx.beginPath();
-            ctx.arc(t.x, t.y, 2.5 - (i / this.trail.length) * 2, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${a})`;
+            ctx.arc(this.trail[i].x, this.trail[i].y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${this.color},${(i / this.trail.length) * 0.6})`;
             ctx.fill();
         }
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgb(${this.color[0]},${this.color[1]},${this.color[2]})`;
-        ctx.shadowColor = `rgb(${this.color[0]},${this.color[1]},${this.color[2]})`;
-        ctx.shadowBlur  = 12;
+        ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgb(${this.color})`;
+        ctx.shadowColor = `rgb(${this.color})`;
+        ctx.shadowBlur = 8;
         ctx.fill();
         ctx.shadowBlur = 0;
     }
@@ -284,87 +279,49 @@ class Rocket {
 
 class Spark {
     constructor(x, y, color) {
-        this.x = x; this.y = y;
-        this.color = color;
+        this.x = x; this.y = y; this.color = color;
         const ang = Math.random() * Math.PI * 2;
-        const spd = Math.random() * 9 + 3;
-        this.vx   = Math.cos(ang) * spd;
-        this.vy   = Math.sin(ang) * spd;
+        const spd = Math.random() * 7 + 2;
+        this.vx = Math.cos(ang) * spd;
+        this.vy = Math.sin(ang) * spd;
         this.life = 1;
-        this.decay = Math.random() * 0.018 + 0.012;
-        this.size  = Math.random() * 3 + 1;
-        this.tail  = [];
-        this.isStar = Math.random() > 0.65;
+        this.decay = Math.random() * 0.022 + 0.014; // decai mais rápido = menos tempo no canvas
+        this.size = Math.random() * 2.5 + 1;
     }
     update() {
-        this.tail.push({ x: this.x, y: this.y });
-        if (this.tail.length > 8) this.tail.shift();
-        this.x  += this.vx;
-        this.y  += this.vy;
-        this.vy += 0.18; // gravity
-        this.vx *= 0.97;
-        this.vy *= 0.97;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.2;
+        this.vx *= 0.96;
         this.life -= this.decay;
     }
     draw() {
-        if (this.life <= 0) return;
-        // tail
-        for (let i = 0; i < this.tail.length; i++) {
-            const t = this.tail[i];
-            const a = (i / this.tail.length) * this.life * 0.5;
-            ctx.beginPath();
-            ctx.arc(t.x, t.y, this.size * (i/this.tail.length) * 0.7, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${a})`;
-            ctx.fill();
-        }
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.life})`;
-        ctx.shadowColor = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},0.8)`;
-        ctx.shadowBlur  = 8;
+        ctx.fillStyle = `rgba(${this.color},${this.life * 0.9})`;
         ctx.fill();
-        ctx.shadowBlur = 0;
     }
     get dead() { return this.life <= 0; }
 }
 
 function explode(x, y, color) {
-    const count = 40 + Math.floor(Math.random() * 20);
-    for (let i = 0; i < count; i++) sparks.push(new Spark(x, y, color));
-    // segundo anel dourado
-    if (Math.random() > 0.5) {
-        const gold = FIREWORK_COLORS[1];
-        for (let i = 0; i < 30; i++) sparks.push(new Spark(x, y, gold));
-    }
-    // flash no canvas
-    ctx.save();
-    ctx.globalAlpha = 0.18;
-    ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
-    ctx.restore();
+    // MAX_SPARKS faíscas (era 90-140)
+    for (let i = 0; i < MAX_SPARKS; i++) sparks.push(new Spark(x, y, color));
 }
 
-const rockets = [];
-const sparks  = [];
+const rockets = [], sparks = [];
 
+// Máx 2 foguetes simultâneos
 function lancarFogo() {
-    rockets.push(new Rocket());
+    if (rockets.length < 2) rockets.push(new Rocket());
 }
+setInterval(lancarFogo, INTERVALO_FOGUETE);
+setTimeout(lancarFogo, 1000);
 
-// Intervalo de fogos — mais frequente para TV
-setInterval(lancarFogo, 10000);
-setTimeout(lancarFogo, 800);
-setTimeout(lancarFogo, 2200);
-
-// Salva de fogos a cada troca de slide
-function salvaDeFogos() {
-    const count = 1 + Math.floor(Math.random() * 2);
-    for (let i = 0; i < count; i++) {
-        setTimeout(() => rockets.push(new Rocket()), i * 280);
-    }
-}
-
+// Loop do canvas — fundo semi-transparente para trilha (sem clearRect total)
 function loopFogos() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "rgba(20,5,9,0.22)";
+    ctx.fillRect(0, 0, W, H);
 
     for (let i = rockets.length - 1; i >= 0; i--) {
         rockets[i].update();
@@ -381,74 +338,44 @@ function loopFogos() {
 }
 loopFogos();
 
-// ═══════════════════════════
-//  BURST DOM
-// ═══════════════════════════
+// ══════════════════════════════════════════
+//  BURST DOM — só na troca de slide
+// ══════════════════════════════════════════
 function criarBurst(x, y) {
-    const count = 14;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < 10; i++) {
         const dot = document.createElement("div");
         dot.className = "burst-dot";
-        const ang  = (i / count) * 360;
-        const dist = Math.random() * 80 + 40;
-        const rad  = (ang * Math.PI) / 180;
+        const ang  = (i / 10) * Math.PI * 2;
+        const dist = Math.random() * 60 + 30;
         dot.style.cssText = `
             left:${x}px; top:${y}px;
-            --dx: calc(-50% + ${Math.cos(rad)*dist}px);
-            --dy: calc(-50% + ${Math.sin(rad)*dist}px);
-            background:${i%3===0?"rgba(232,192,122,0.95)":"rgba(196,96,126,0.88)"};
-            width:${Math.random()*5+2}px; height:${Math.random()*5+2}px;
-            animation-duration:${Math.random()*0.35+0.5}s;
+            --dx:calc(-50% + ${Math.cos(ang)*dist}px);
+            --dy:calc(-50% + ${Math.sin(ang)*dist}px);
+            width:${Math.random()*4+2}px; height:${Math.random()*4+2}px;
+            background:${i%2===0?"rgba(196,96,126,0.9)":"rgba(232,192,122,0.85)"};
             animation-delay:${i*0.02}s;
         `;
         document.body.appendChild(dot);
-        setTimeout(() => dot.remove(), 1000);
+        setTimeout(() => dot.remove(), 900);
     }
-    [50,100,170].forEach((size, idx) => {
+    [60, 130].forEach((size, idx) => {
         const ring = document.createElement("div");
         ring.className = "burst-ring";
         ring.style.cssText = `
             left:${x}px; top:${y}px;
             width:${size}px; height:${size}px;
-            animation-delay:${idx*0.13}s;
-            border-color:${idx===1?"rgba(232,192,122,0.55)":"rgba(196,96,126,0.65)"};
+            animation-delay:${idx*0.14}s;
+            border-color:${idx===0?"rgba(196,96,126,0.7)":"rgba(232,192,122,0.5)"};
         `;
         document.body.appendChild(ring);
-        setTimeout(() => ring.remove(), 1400);
+        setTimeout(() => ring.remove(), 1100);
     });
 }
 
-// Burst automático periódico
-setInterval(() => {
-    const x = W * (0.1 + Math.random() * 0.8);
-    const y = H * (0.1 + Math.random() * 0.65);
-    criarBurst(x, y);
-}, 6000);
-
-// ═══════════════════════════
-//  CURSOR
-// ═══════════════════════════
-const cursor    = document.getElementById("cursor");
-const cursorDot = document.getElementById("cursor-dot");
-document.addEventListener("mousemove", e => {
-    cursor.style.left    = e.clientX + "px";
-    cursor.style.top     = e.clientY + "px";
-    cursorDot.style.left = e.clientX + "px";
-    cursorDot.style.top  = e.clientY + "px";
-});
-
-// ═══════════════════════════
+// ══════════════════════════════════════════
 //  INTERAÇÃO
-// ═══════════════════════════
-document.addEventListener("click", e => {
-    const r = document.createElement("div");
-    r.className = "ripple";
-    r.style.cssText = `left:${e.clientX}px; top:${e.clientY}px; width:100px; height:100px;`;
-    document.body.appendChild(r);
-    criarBurst(e.clientX, e.clientY);
-    setTimeout(() => r.remove(), 900);
-    proximo();
-});
+// ══════════════════════════════════════════
+document.addEventListener("click", proximo);
 
 document.addEventListener("keydown", e => {
     if (e.key === "ArrowRight" || e.key === " ") proximo();
@@ -459,14 +386,11 @@ document.addEventListener("keydown", e => {
     }
 });
 
-// ── SALVA DE FOGOS a cada troca de slide (hookando mostrarSlide)
-const _mostrarOriginal = mostrarSlide;
-// Override feito via disparo no próprio mostrarSlide acima com salvaDeFogos
-setInterval(salvaDeFogos, DURACAO_POR_FOTO);
-
 let tx = 0;
-document.addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, { passive:true });
+document.addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, { passive: true });
 document.addEventListener("touchend", e => {
     const d = tx - e.changedTouches[0].clientX;
-    if (Math.abs(d) > 50) d > 0 ? proximo() : mostrarSlide((current - 1 + slides.length) % slides.length);
+    if (Math.abs(d) > 50) d > 0
+        ? proximo()
+        : mostrarSlide((current - 1 + slides.length) % slides.length);
 });
