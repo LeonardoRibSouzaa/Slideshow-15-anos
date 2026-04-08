@@ -336,7 +336,7 @@ class Spark {
 }
 
 function explode(x, y, color) {
-    const count = 90 + Math.floor(Math.random() * 50);
+    const count = 40 + Math.floor(Math.random() * 20);
     for (let i = 0; i < count; i++) sparks.push(new Spark(x, y, color));
     // segundo anel dourado
     if (Math.random() > 0.5) {
@@ -358,13 +358,13 @@ function lancarFogo() {
 }
 
 // Intervalo de fogos — mais frequente para TV
-setInterval(lancarFogo, 3200);
+setInterval(lancarFogo, 10000);
 setTimeout(lancarFogo, 800);
 setTimeout(lancarFogo, 2200);
 
 // Salva de fogos a cada troca de slide
 function salvaDeFogos() {
-    const count = 3 + Math.floor(Math.random() * 3);
+    const count = 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < count; i++) {
         setTimeout(() => rockets.push(new Rocket()), i * 280);
     }
