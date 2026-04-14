@@ -23,6 +23,18 @@ body::after {
     opacity: 0.025; pointer-events: none; z-index: 98; mix-blend-mode: overlay;
 }
 
+.video {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.video__background {
+    width: 100%;
+    height: 100%;
+}
+
 /* ── AURORA — 3 blobs, blur reduzido, will-change ── */
 #aurora {
     position: absolute; inset: 0; z-index: 1;
